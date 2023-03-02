@@ -1,13 +1,13 @@
-const weatherAPI='b4b745506e8e239cd263749221560315';
-const waqiAPI='f042f2bcc0a019fe2954094798a64289fb1200e2';
+const weatherAPI = "b4b745506e8e239cd263749221560315";
+const waqiAPI = "f042f2bcc0a019fe2954094798a64289fb1200e2";
 
 loadCoords();
 // 현재 위치 기준 슬라이드 적용
 function loadCoords() {
-    navigator.geolocation.getCurrentPosition(function(geo){
+  navigator.geolocation.getCurrentPosition(function (geo) {
     const lat = geo.coords.latitude;
     const lon = geo.coords.longitude;
-    const $swiperSlide=$('.swiper-slide').eq(0);
+    const $swiperSlide = $(".swiper-slide").eq(0);
     getCurrentWeather($swiperSlide, lat, lon);
     getWeeklyWeather($swiperSlide, lat, lon);
     getCurrentUV($swiperSlide, lat, lon);
@@ -16,74 +16,76 @@ function loadCoords() {
   });
 }
 
-function getArea(){
-  var area=localStorage.getItem('area');
+function getArea() {
+  var area = localStorage.getItem("area");
   return JSON.parse(area);
 }
 
-function setArea(area){
-  var area=JSON.stringify(area);
-  localStorage.setItem('area', area);
+function setArea(area) {
+  var area = JSON.stringify(area);
+  localStorage.setItem("area", area);
 }
 
 var swiper;
-var area=getArea();
-if(area!=null){
-  var swiperSlide=$('.swiper-wrapper').html();
+var area = getArea();
+if (area != null) {
+  var swiperSlide = $(".swiper-wrapper").html();
   area.forEach((obj, index) => {
-    if(obj.id!="main"){
-      $('.swiper-wrapper').append(swiperSlide);
-      const lat=obj.lat;
-      const lon=obj.lon;
-      const $swiperSlide=$('.swiper-slide').eq(index);
+    if (obj.id != "main") {
+      $(".swiper-wrapper").append(swiperSlide);
+      const lat = obj.lat;
+      const lon = obj.lon;
+      const $swiperSlide = $(".swiper-slide").eq(index);
       getCurrentWeather($swiperSlide, lat, lon);
       getWeeklyWeather($swiperSlide, lat, lon);
       getCurrentUV($swiperSlide, lat, lon);
       getCurrentDust($swiperSlide, lat, lon);
     }
-  })
+  });
   swiper = new Swiper(".swiper-container");
-  swiper.on('slideChange', function () {
-    var index=swiper.realIndex;
-    var placeName=$('.popup-place li').eq(index+1).find('button').text();
-    $('.header-place span').text(placeName);
-    $('.popup-place li').eq(0).find('span').text(placeName);
-    var currentDust = $('.dust-info').eq(index).text();
+  swiper.on("slideChange", function () {
+    var index = swiper.realIndex;
+    var placeName = $(".popup-place li")
+      .eq(index + 1)
+      .find("button")
+      .text();
+    $(".header-place span").text(placeName);
+    $(".popup-place li").eq(0).find("span").text(placeName);
+    var currentDust = $(".dust-info").eq(index).text();
     var dustColor;
-    if(currentDust === '좋음'){
-      dustColor = 'body-blue';
-    }else if(currentDust === '보통'){
-      dustColor = 'body-green';
-    }else if(currentDust === '나쁨'){
-      dustColor = 'body-yellow';
-    }else if(currentDust === '매우나쁨'){
-      dustColor = 'body-red';
+    if (currentDust === "좋음") {
+      dustColor = "body-blue";
+    } else if (currentDust === "보통") {
+      dustColor = "body-green";
+    } else if (currentDust === "나쁨") {
+      dustColor = "body-yellow";
+    } else if (currentDust === "매우나쁨") {
+      dustColor = "body-red";
     }
-    $('body').removeClass(function(i, className){
-      var className = className.split(' ');
+    $("body").removeClass(function (i, className) {
+      var className = className.split(" ");
       $(this).removeClass(className[1]);
-    })
-    $('body').addClass(dustColor);
+    });
+    $("body").addClass(dustColor);
   });
 }
 
-$(".popup-place").on("click", "li:not(.default) button", function() {
-  var index=$(this).index('li:not(.default) button');
+$(".popup-place").on("click", "li:not(.default) button", function () {
+  var index = $(this).index("li:not(.default) button");
   swiper.slideTo(index);
   $(".popup-bg").hide();
   $(".popup-place").hide();
 });
-
 
 // current weather
 function getCurrentWeather(el, lat, lon) {
   fetch(
     `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherAPI}&units=metric`
   )
-    .then(function(response) {
+    .then(function (response) {
       return response.json();
     })
-    .then(function(json) {      
+    .then(function (json) {
       var nowTemp = Math.round(json.main.temp);
       var humidity = json.main.humidity;
       var wind = json.wind.speed;
@@ -99,28 +101,28 @@ function getCurrentWeather(el, lat, lon) {
       sunsetTime = sunsetTime.split(" ");
       var sunsetTimeSet = sunsetTime[1];
       sunsetTimeSet = sunsetTimeSet.split(":");
-      sunsetTimeSet = `${parseInt(sunsetTimeSet[0])+12}:${sunsetTimeSet[1]}`;
+      sunsetTimeSet = `${parseInt(sunsetTimeSet[0]) + 12}:${sunsetTimeSet[1]}`;
       var weatherIconText = {
-        '01d' : '맑음',
-        '01n' : '맑음',
-        '02d' : '구름 조금',
-        '02n' : '구름 조금',
-        '03d' : '흐림', 
-        '03n' : '흐림',
-        '04d' : '흐림',
-        '04n' : '흐림',
-        '09d' : '소나기',
-        '09n' : '소나기',
-        '10d' : '비',
-        '10n' : '비',
-        '11d' : '번개',
-        '11n' : '번개',
-        '13d' : '눈',
-        '13n' : '눈',
-        '50d' : '안개',
-        '50n' : '안개'
-      }
-      el.find('.weather-textbox .weather-info').text(weatherIconText[icon])
+        "01d": "맑음",
+        "01n": "맑음",
+        "02d": "구름 조금",
+        "02n": "구름 조금",
+        "03d": "흐림",
+        "03n": "흐림",
+        "04d": "흐림",
+        "04n": "흐림",
+        "09d": "소나기",
+        "09n": "소나기",
+        "10d": "비",
+        "10n": "비",
+        "11d": "번개",
+        "11n": "번개",
+        "13d": "눈",
+        "13n": "눈",
+        "50d": "안개",
+        "50n": "안개",
+      };
+      el.find(".weather-textbox .weather-info").text(weatherIconText[icon]);
       el.find(".weather-info .weather-temp").text(nowTemp + "°");
       el.find(".weather-today-detail")
         .find(".humidity")
@@ -140,12 +142,8 @@ function getCurrentWeather(el, lat, lon) {
       );
       el.find(".today-sun span:nth-child(1)").text(sunriseTimeSet);
       el.find(".today-sun span:nth-child(2)").text(sunsetTimeSet);
-      el.find(".tomorrow-sun div span:nth-child(1)>span").text(
-        sunriseTimeSet
-      );
-      el.find(".tomorrow-sun div span:nth-child(2)>span").text(
-        sunsetTimeSet
-      );
+      el.find(".tomorrow-sun div span:nth-child(1)>span").text(sunriseTimeSet);
+      el.find(".tomorrow-sun div span:nth-child(2)>span").text(sunsetTimeSet);
     });
 }
 
@@ -154,12 +152,12 @@ function getWeeklyWeather(el, lat, lon) {
   fetch(
     `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${weatherAPI}&units=metric`
   )
-    .then(function(response) {
+    .then(function (response) {
       return response.json();
     })
-    .then(function(json) {      
-      printWeeklyData(el, json,'.weather-tab')
-      saveHourlyData(el,json, '.weather-tab')
+    .then(function (json) {
+      printWeeklyData(el, json, ".weather-tab");
+      saveHourlyData(el, json, ".weather-tab");
     });
 }
 
@@ -168,132 +166,113 @@ function getCurrentUV(el, lat, lon) {
   fetch(
     `https://api.openweathermap.org/data/2.5/uvi?lat=${lat}&lon=${lon}&appid=${weatherAPI}&units=metric`
   )
-    .then(function(response) {
+    .then(function (response) {
       return response.json();
     })
-    .then(function(json) {
+    .then(function (json) {
       var currentUV = json.value;
-      el.find(".weather-today-detail")
-        .find(".uv")
-        .text(currentUV);
+      el.find(".weather-today-detail").find(".uv").text(currentUV);
     });
 }
 
 // current Dust
 function getCurrentDust(el, lat, lon) {
   fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${waqiAPI}`)
-  .then(function(response) {
-    return response.json();
-  })
-  .then(function(json) {
-    var aqiValue = json.data.aqi;
-    var dustValue;
-    var dustKor;
-    var dustIcon;
-    if (aqiValue < 51) {
-      dustValue = "dust-good";
-      dustKor = "좋음";
-      dustIcon = "dust1";
-      dustColor="body-blue";
-      changeColors(
-        el,
-        1,
-        dustColor
-      );
-    } else if (51 <= aqiValue && aqiValue < 101) {
-      dustValue = "dust-soso";
-      dustKor = "보통";
-      dustIcon = "dust2";
-      dustColor="body-green";
-      changeColors(
-        el,
-        2,
-        dustColor
-      );
-    } else if (101 <= aqiValue && aqiValue < 201) {
-      dustValue = "dust-bad";
-      dustKor = "나쁨";
-      dustIcon = "dust3";
-      dustColor="body-yellow";
-      changeColors(
-        el,
-        3,
-        dustColor
-      );
-    } else {
-      dustValue = "dust-terrible";
-      dustKor = "매우나쁨";
-      dustIcon = "dust4";
-      dustColor="body-red";
-      changeColors(
-        el,
-        4,
-        dustColor
-      );
-    }
-    var aqiPerc = aqiValue / 3 + 16;
-    if (aqiPerc > 95) {
-      aqiPerc = 95;
-    }
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (json) {
+      var aqiValue = json.data.aqi;
+      var dustValue;
+      var dustKor;
+      var dustIcon;
+      if (aqiValue < 51) {
+        dustValue = "dust-good";
+        dustKor = "좋음";
+        dustIcon = "dust1";
+        dustColor = "body-blue";
+        changeColors(el, 1, dustColor);
+      } else if (51 <= aqiValue && aqiValue < 101) {
+        dustValue = "dust-soso";
+        dustKor = "보통";
+        dustIcon = "dust2";
+        dustColor = "body-green";
+        changeColors(el, 2, dustColor);
+      } else if (101 <= aqiValue && aqiValue < 201) {
+        dustValue = "dust-bad";
+        dustKor = "나쁨";
+        dustIcon = "dust3";
+        dustColor = "body-yellow";
+        changeColors(el, 3, dustColor);
+      } else {
+        dustValue = "dust-terrible";
+        dustKor = "매우나쁨";
+        dustIcon = "dust4";
+        dustColor = "body-red";
+        changeColors(el, 4, dustColor);
+      }
+      var aqiPerc = aqiValue / 3 + 16;
+      if (aqiPerc > 95) {
+        aqiPerc = 95;
+      }
 
-    el.find(".dust-info").text(dustKor);
-    el.find(".weather-img img:nth-child(2)").attr(
-      "src",
-      `img/dust/${dustIcon}.svg`
-    );
-    el.find(".dust-value-bar").css("left", `${aqiPerc}%`);
-    printWeeklyData(el, json,".dust-tab",dustKor,dustValue);
-    saveHourlyData(el, json,".dust-tab",dustKor,dustValue);
-  });
+      el.find(".dust-info").text(dustKor);
+      el.find(".weather-img img:nth-child(2)").attr(
+        "src",
+        `img/dust/${dustIcon}.svg`
+      );
+      el.find(".dust-value-bar").css("left", `${aqiPerc}%`);
+      printWeeklyData(el, json, ".dust-tab", dustKor, dustValue);
+      saveHourlyData(el, json, ".dust-tab", dustKor, dustValue);
+    });
 }
 
 function changeColors(el, colorNum, dustColor) {
-
-
-  if(el.hasClass('swiper-slide-active')){
-    $('body').removeClass(function(i, className){
-      var className = className.split(' ');
+  if (el.hasClass("swiper-slide-active")) {
+    $("body").removeClass(function (i, className) {
+      var className = className.split(" ");
       $(this).removeClass(className[1]);
-      
-    })
-    $('body').addClass(dustColor);
+    });
+    $("body").addClass(dustColor);
   }
-  
 
-  el.find(".sunrise-sunset img").attr("src", `img/sunrise-sunset-${colorNum}.svg`);
+  el.find(".sunrise-sunset img").attr(
+    "src",
+    `img/sunrise-sunset-${colorNum}.svg`
+  );
 }
 
-function printWeeklyData(el, json, tab, dustKor, dustValue){
+function printWeeklyData(el, json, tab, dustKor, dustValue) {
   el.find(`.weather-tab-contents ${tab} table tbody`).empty();
   //최대 7일치 정보 뽑기
   for (let index = 0; index < 6; index++) {
     //하루씩 더하기
-    var today=new Date();          
-    today.setDate(today.getDate()+Number(index));
+    var today = new Date();
+    today.setDate(today.getDate() + Number(index));
     var year = today.getFullYear();
-    var month = today.getMonth()+1;
-    var date = today.getDate();      
-    var day = today.getDay();  
+    var month = today.getMonth() + 1;
+    var date = today.getDate();
+    var day = today.getDay();
     var dayKor = ["일", "월", "화", "수", "목", "금", "토"];
-    if(month < 10){
-      month = '0'+month;
+    if (month < 10) {
+      month = "0" + month;
     }
-    if(date < 10){
-      date = '0'+date;
+    if (date < 10) {
+      date = "0" + date;
     }
-    var fullDate=year+'-'+month+'-'+date;
-    var printDate = fullDate.split('-');
-    printDate = printDate[1]+'/'+printDate[2]
-    if(tab === '.weather-tab'){
+    var fullDate = year + "-" + month + "-" + date;
+    var printDate = fullDate.split("-");
+    printDate = printDate[1] + "/" + printDate[2];
+    if (tab === ".weather-tab") {
       for (const i in json.list) {
-        var obj=json.list;
-        var findDay = obj[i].dt_txt.split(' ')[0];
-        if(fullDate===findDay){
-         var icon = obj[i].weather[0].icon;
-         var humidity = obj[i].main.humidity;
-         var temp = obj[i].main.temp;
-         temp= Math.round(temp)
-         el.find(`.weather-tab-contents ${tab} table tbody`).append(`
+        var obj = json.list;
+        var findDay = obj[i].dt_txt.split(" ")[0];
+        if (fullDate === findDay) {
+          var icon = obj[i].weather[0].icon;
+          var humidity = obj[i].main.humidity;
+          var temp = obj[i].main.temp;
+          temp = Math.round(temp);
+          el.find(`.weather-tab-contents ${tab} table tbody`).append(`
             <tr>
                 <td>${printDate} (${dayKor[day]})</td>
                 <td><i class="sprite-small sprite-${icon}"></i></td>
@@ -302,9 +281,9 @@ function printWeeklyData(el, json, tab, dustKor, dustValue){
             </tr>`);
           break;
         }
-      }        
-    }else{
-      for (let i = 0; i < 6; i++) { 
+      }
+    } else {
+      for (let i = 0; i < 6; i++) {
         el.find(`.weather-tab-contents ${tab} table tbody`).append(`
           <tr>
             <td>${printDate} (${dayKor[day]})</td>
@@ -320,110 +299,115 @@ function printWeeklyData(el, json, tab, dustKor, dustValue){
           </td>
         </tr>`);
         break;
-      } 
+      }
     }
   }
 }
 
 // hourly forecast
-function saveHourlyData(el, json, tab, dustKor, dustValue){
-  if(tab === '.weather-tab'){
-    var tempList=[];
+function saveHourlyData(el, json, tab, dustKor, dustValue) {
+  if (tab === ".weather-tab") {
+    var tempList = [];
     var weatherIconList = [];
     for (let i = 0; i < 12; i++) {
-      var temp=Math.round(json.list[i].main.temp);
+      var temp = Math.round(json.list[i].main.temp);
       tempList.push(temp);
-      var weatherIcon=json.list[i].weather[0].icon;
+      var weatherIcon = json.list[i].weather[0].icon;
       weatherIconList.push(weatherIcon);
     }
     var weatherInfo = {
-      tempList : tempList,
-      weatherIconList : weatherIconList      
-    };        
-    printHourlyWeather(el, weatherInfo)
-  }else{
+      tempList: tempList,
+      weatherIconList: weatherIconList,
+    };
+    printHourlyWeather(el, weatherInfo);
+  } else {
     var dustKor = dustKor;
     var dustValue = dustValue;
-    dustInfo=[dustKor,dustValue];
-    printHourlyDust(el, dustInfo)
-  }  
-}
-
-function printHourlyWeather(el, weatherInfo){
-  var tempList = weatherInfo.tempList;
-  var weatherIconList = weatherInfo.weatherIconList;
-  
-  for (let i = 0; i < 12; i++) { 
-    var time = new Date().getHours(); 
-    var time = time+i; 
-    var ampm; 
-    if(time === 24 || time<12){
-      ampm = '오전'
-    }else if(time === 12){
-      ampm = '오후'
-    }else{
-      ampm = '오후'
-      time= time-12;
-    }
-    el.find('.weather-time-list li').eq(i).find('.time').text(`${ampm} ${time}시`);
-    el.find('.weather-time-list li').eq(i).find('.time-weather').append(`
-      <div class="sprite-big sprite-${weatherIconList[i]}"></div>
-      <span class="time-deg">${tempList[i]}°</span>
-  `)
+    dustInfo = [dustKor, dustValue];
+    printHourlyDust(el, dustInfo);
   }
 }
 
-function printHourlyDust(el, dustInfo){
+function printHourlyWeather(el, weatherInfo) {
+  var tempList = weatherInfo.tempList;
+  var weatherIconList = weatherInfo.weatherIconList;
+
+  for (let i = 0; i < 12; i++) {
+    var time = new Date().getHours();
+    var time = time + i;
+    var ampm;
+    if (time === 24 || time < 12) {
+      ampm = "오전";
+    } else if (time === 12) {
+      ampm = "오후";
+    } else {
+      ampm = "오후";
+      time = time - 12;
+    }
+    el.find(".weather-time-list li")
+      .eq(i)
+      .find(".time")
+      .text(`${ampm} ${time}시`);
+    el.find(".weather-time-list li").eq(i).find(".time-weather").append(`
+      <div class="sprite-big sprite-${weatherIconList[i]}"></div>
+      <span class="time-deg">${tempList[i]}°</span>
+  `);
+  }
+}
+
+function printHourlyDust(el, dustInfo) {
   var dustKor = dustInfo[0];
   var dustValue = dustInfo[1];
-  for (let i = 0; i < 12; i++) { 
-    el.find('.weather-time-list li').eq(i).find('.time-dust').append(`
+  for (let i = 0; i < 12; i++) {
+    el.find(".weather-time-list li").eq(i).find(".time-dust").append(`
       <div class="sprite-big ${dustValue}"></div>
       <span class="time-dust-value">${dustKor}</span>
-    `)
+    `);
   }
 }
 
 // main location
-function mainLocation(lat, lon){
+function mainLocation(lat, lon) {
   var geocoder = new kakao.maps.services.Geocoder();
-  var coord = new kakao.maps.LatLng(lat,lon);
+  var coord = new kakao.maps.LatLng(lat, lon);
 
-  var callback = function(result, status) {
+  var callback = function (result, status) {
     if (status === kakao.maps.services.Status.OK) {
-        var thisPlace = result[0].address.address_name;
-        thisPlace = thisPlace.split(' ');
-        thisPlace = thisPlace[1]+' '+thisPlace[2];
-        $('.header-place span').text(thisPlace);
-        var thisPlace = $('.header-place span').text();
-        var getPlace = getArea();
-        
-        if(getPlace==null){
-          getPlace=[];
-          var mainPlace={
-            id:'main',
-            area: thisPlace,
-            lat:lat,
-            lon,lon
+      var thisPlace = result[0].address.address_name;
+      thisPlace = thisPlace.split(" ");
+      thisPlace = thisPlace[1] + " " + thisPlace[2];
+      console.log(thisPlace);
+      $(".header-place span").text(thisPlace);
+      var thisPlace = $(".header-place span").text();
+      var getPlace = getArea();
+
+      if (getPlace == null) {
+        getPlace = [];
+        var mainPlace = {
+          id: "main",
+          area: thisPlace,
+          lat: lat,
+          lon,
+          lon,
+        };
+        getPlace.push(mainPlace);
+      } else {
+        getPlace.forEach((obj) => {
+          if (obj.id == "main") {
+            obj.area = thisPlace;
+            obj.lat = lat;
+            obj.lon = lon;
           }
-          getPlace.push(mainPlace)
-        }else{          
-          getPlace.forEach(obj => {
-            if(obj.id=='main'){
-              obj.area=thisPlace;
-              obj.lat=lat;
-              obj.lon=lon;
-            }
-          });
-        }
-        setArea(getPlace);
-        getPlace = getArea();
-        if (getPlace.length === 1) {
-          $(".header-place .arrow-down").hide();
-        } else {
-          $(".header-place .arrow-down").show();
-          $(".popup-place ul").empty();
-          $(".popup-place ul").append(`
+        });
+      }
+      setArea(getPlace);
+      getPlace = getArea();
+      if (getPlace.length === 1) {
+        $(".header-place .arrow-down").hide();
+      } else {
+        $(".header-place .arrow-down").show();
+        $(".popup-place ul").empty();
+        $(".popup-place ul").append(`
                   <li class="default">
                       <button>
                           <i class="material-icons">room</i>
@@ -432,12 +416,12 @@ function mainLocation(lat, lon){
                       </button>
                   </li>
               `);
-          for (const i in getPlace) {
-            $(".popup-place ul").append(`
+        for (const i in getPlace) {
+          $(".popup-place ul").append(`
               <li class="${getPlace[i].id}"><button>${getPlace[i].area}</button></li>
             `);
-          }
         }
+      }
     }
   };
   geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
