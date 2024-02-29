@@ -132,12 +132,15 @@ function setArea(area) {
 
 function getArea() {
   var getArea = localStorage.getItem("area");
+  if (getArea === null) {
+    return []; // `null` 대신 빈 배열 반환
+  }
   return JSON.parse(getArea);
 }
 
 function printArea(area) {
   $(".area-list ul").empty();
-
+  console.log(area)
   if (area.length === 1) {
     $(".area-list ul").append(`
       <li><p>등록된 지역이 없습니다.</p></li>
